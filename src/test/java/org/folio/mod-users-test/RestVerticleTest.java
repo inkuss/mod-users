@@ -62,7 +62,7 @@ public class RestVerticleTest {
         res.bodyHandler(buf -> {
           JsonObject userCollectionObject = buf.toJsonObject();
           if(userCollectionObject.getJsonArray("users").size() == 0 &&
-                  userCollectionObject.getInteger("total_records") == 00) {
+                  userCollectionObject.getInteger("total_records") == 0) {
             future.complete();
           } else {
             future.fail("Invalid return JSON: " + buf.toString());
