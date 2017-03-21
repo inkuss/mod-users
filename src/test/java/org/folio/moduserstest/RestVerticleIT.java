@@ -14,19 +14,19 @@ import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 
+import java.util.stream.Collectors;
+
 import org.folio.rest.RestVerticle;
 import org.folio.rest.client.TenantClient;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.utils.NetworkUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
 
 @RunWith(VertxUnitRunner.class)
-public class RestVerticleTest {
+public class RestVerticleIT {
 
   private static final String       SUPPORTED_CONTENT_TYPE_JSON_DEF = "application/json";
   private static final String       SUPPORTED_CONTENT_TYPE_TEXT_DEF = "text/plain";
@@ -38,8 +38,20 @@ public class RestVerticleTest {
   private static Vertx vertx;
   static int port;
 
-  @Rule
-  public Timeout rule = Timeout.seconds(180);  // 3 minutes for loading embedded postgres
+  public static void dropSchema(TestContext context) {
+    String sql = "drop schema if exists diku_mod_users cascade;\n"
+        + "drop role if exists diku_mod_users;\n";
+    Async async = context.async();
+    PostgresClient.getInstance(vertx).runSQLFile(sql, true, result -> {
+      if (result.failed()) {
+        context.fail(result.cause());
+      } else if (! result.result().isEmpty()) {
+        context.fail("runSQLFile failed with: " + result.result().stream().collect(Collectors.joining(" ")));
+      }
+      async.complete();
+    });
+    async.await();
+  }
 
   @BeforeClass
   public static void setup(TestContext context) {
@@ -47,24 +59,14 @@ public class RestVerticleTest {
     port = NetworkUtils.nextFreePort();
     TenantClient tenantClient = new TenantClient("localhost", port, "diku");
     vertx = Vertx.vertx();
+    dropSchema(context);
     DeploymentOptions options = new DeploymentOptions().setConfig(new JsonObject().put("http.port", port));
-    try {
-      PostgresClient.setIsEmbedded(true);
-      PostgresClient.getInstance(vertx).startEmbeddedPostgres();
-    } catch(Exception e) {
-      e.printStackTrace();
-      context.fail(e);
-      return;
-    }
     vertx.deployVerticle(RestVerticle.class.getName(), options, res -> {
       try {
-        tenantClient.post(null, res2 -> {
-           async.complete();
-        });
+        tenantClient.post(null, res2 -> async.complete());
       } catch(Exception e) {
-        e.printStackTrace();
+        context.fail(e);
       }
-
     });
   }
 
