@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "contacttypes": {
+      "id": "contacttype",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "$ref": "contacttype"
+      }
+    },
+    "totalRecords": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "contacttypes",
+    "totalRecords"
+  ]
+}

@@ -67,6 +67,33 @@
       ]
     },
     {
+      "id": "contact-types",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": ["GET"],
+          "pathPattern": "/contact-types",
+          "permissionsRequired": ["users.item.get"]
+        }, {
+          "methods": ["GET"],
+          "pathPattern": "/contact-types/{id}",
+          "permissionsRequired": ["users.item.get"]
+        }, {
+          "methods": ["POST"],
+          "pathPattern": "/contact-types",
+          "permissionsRequired": ["users.contact-types.item.post"]
+        }, {
+          "methods": ["PUT"],
+          "pathPattern": "/contact-types/{id}",
+          "permissionsRequired": ["users.contact-types.item.put"]
+        }, {
+          "methods": ["DELETE"],
+          "pathPattern": "/contact-types/{id}",
+          "permissionsRequired": ["users.contact-types.item.delete"]
+        }
+      ]
+    },
+    {
       "id": "_tenant",
       "version": "1.0.0",
       "interfaceType" : "system",
